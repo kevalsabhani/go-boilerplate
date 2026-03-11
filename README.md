@@ -1,1 +1,1 @@
-# go-boilerplate
+# Go Boilerplate

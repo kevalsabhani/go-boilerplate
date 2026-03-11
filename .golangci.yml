@@ -1,0 +1,262 @@
+run:
+  # Timeout for analysis, e.g. 30s, 5m, default is 1m.
+  timeout: 30m
+  # Default concurrency is available CPU number.
+  concurrency: 4
+  # Include test files or not, default is true.
+  tests: true
+  # Allow multiple parallel golangci-lint instances running.
+  allow-parallel-runners: true
+  # If set we pass it to "go list -mod={option}".
+  modules-download-mode: readonly
+  # List of build tags, all linters use it.
+  build-tags:
+    - integration
+
+linters:
+  disable-all: true
+  enable:
+    - gci
+    - gofumpt
+    - copyloopvar
+    - decorder
+    - depguard
+    - errcheck
+    - errorlint
+    - exhaustive
+    - gocritic
+    - gosec
+    - govet
+    - misspell
+    - nolintlint
+    - predeclared
+    - reassign
+    - revive
+    - staticcheck
+    - testifylint
+    - thelper
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+    - whitespace
+
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/open-telemetry/opentelemetry-collector-contrib)
+  gofumpt:
+    extra-rules: true
+
+  depguard:
+    rules:
+      denied-deps:
+        deny:
+          - pkg: github.com/azure/go-autorest
+            desc: "This package is deprecated (EOL). Please use an alternative Azure SDK."
+          - pkg: go.uber.org/atomic
+            desc: "Use 'sync/atomic' instead of go.uber.org/atomic"
+          - pkg: github.com/pkg/errors
+            desc: "Use 'errors' or 'fmt' instead of github.com/pkg/errors"
+          - pkg: github.com/hashicorp/go-multierror
+            desc: "Use go.uber.org/multierr instead of github.com/hashicorp/go-multierror"
+          - pkg: math/rand$
+            desc: "Use math/rand/v2 instead of math/rand"
+          - pkg: sigs.k8s.io/yaml
+            desc: "Use 'go.yaml.in/yaml' instead of sigs.k8s.io/yaml"
+      semconv:
+        list-mode: lax
+        deny:
+          - pkg: go.opentelemetry.io/otel/semconv
+            desc: "Use go.opentelemetry.io/otel/semconv/v1.39.0 instead."
+        allow:
+          - go.opentelemetry.io/otel/semconv/v1.9.0
+          - go.opentelemetry.io/otel/semconv/v1.12.0
+          - go.opentelemetry.io/otel/semconv/v1.16.0
+          - go.opentelemetry.io/otel/semconv/v1.18.0
+          - go.opentelemetry.io/otel/semconv/v1.19.0
+          - go.opentelemetry.io/otel/semconv/v1.20.0
+          - go.opentelemetry.io/otel/semconv/v1.21.0
+          - go.opentelemetry.io/otel/semconv/v1.25.0
+          - go.opentelemetry.io/otel/semconv/v1.26.0
+          - go.opentelemetry.io/otel/semconv/v1.28.0
+          - go.opentelemetry.io/otel/semconv/v1.31.0
+          - go.opentelemetry.io/otel/semconv/v1.34.0
+          - go.opentelemetry.io/otel/semconv/v1.38.0
+          - go.opentelemetry.io/otel/semconv/v1.39.0
+          - go.opentelemetry.io/otel/semconv/v1.40.0
+      semconv-in-test:
+        list-mode: lax
+        files:
+          - "**/*_test.go"
+        deny:
+          - pkg: go.opentelemetry.io/otel/semconv
+            desc: "Don't import semconv packages in test files, use strings directly instead."
+      ignore-in-test:
+        files:
+          - "!**/*_test.go"
+        deny:
+          - pkg: go.opentelemetry.io/proto
+            desc: "Use go.opentelemetry.io/collector/pdata instead"
+
+  exhaustive:
+    default-signifies-exhaustive: true
+    explicit-exhaustive-switch: true
+    ignore-enum-members: pmetric.MetricTypeEmpty
+
+  gocritic:
+    enable-all: true
+    disabled-checks:
+      - badRegexp
+      - commentedOutCode
+      - deferInLoop
+      - exposedSyncMutex
+      - filepathJoin
+      - hugeParam
+      - importShadow
+      - ptrToRefParam
+      - returnAfterHttpError
+      - todoCommentWithoutDetail
+      - tooManyResultsChecker
+      - unnamedResult
+      - whyNoLint
+
+  gosec:
+    excludes:
+      - G115
+      - G402
+      - G404
+
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+    settings:
+      printf:
+        funcs:
+          - Infof
+          - Warnf
+          - Errorf
+          - Fatalf
+
+  misspell:
+    locale: US
+    ignore-rules:
+      - cancelled
+
+  nolintlint:
+    require-specific: true
+
+  predeclared:
+    ignore: "copy"
+
+  revive:
+    confidence: 0.8
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: early-return
+        arguments: ["preserveScope"]
+      - name: empty-block
+      - name: error-naming
+      - name: error-return
+      - name: error-strings
+      - name: errorf
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: range
+      - name: receiver-naming
+      - name: redefines-builtin-id
+      - name: superfluous-else
+        arguments: ["preserveScope"]
+      - name: time-naming
+      - name: unexported-return
+      - name: unreachable-code
+      - name: unused-parameter
+      - name: unused-receiver
+      - name: use-any
+      - name: use-errors-new
+      - name: var-declaration
+      - name: var-naming
+
+  staticcheck:
+    checks:
+      - all
+      - -ST1003
+      - -ST1005
+      - -ST1011
+
+  testifylint:
+    enable-all: true
+    disable:
+      - encoded-compare
+      - float-compare
+      - require-error
+      - suite-subtest-run
+
+  thelper:
+    benchmark: { begin: false }
+    fuzz: { begin: false }
+    tb: { begin: false }
+    test: { begin: false }
+
+  usetesting:
+    context-background: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-dirs:
+    - third_party
+  warn-unused: true
+  exclude-rules:
+    - path: pagefile.go
+      linters: [unused]
+      text: "cachedBytes"
+    - path: receiver/macosunifiedloggingreceiver/config_common.go
+      linters: [unused]
+      text: "resolvedArchivePaths"
+    - path: processor/transformprocessor/internal/common/
+      linters: [revive]
+      text: "var-naming: avoid meaningless package names"
+    - path: internal/healthcheck/internal/common/
+      linters: [revive]
+      text: "var-naming: avoid meaningless package names"
+    - path: cmd/telemetrygen/pkg/
+      linters: [revive]
+      text: "var-naming: avoid meaningless package names"
+    - path: extension/encoding/googlecloudlogentryencodingextension/internal/shared/
+      linters: [revive]
+      text: "var-naming: avoid meaningless package names"
+    - path: pkg/stanza/errors/
+      linters: [revive]
+      text: "var-naming: avoid package names that conflict with Go standard library package names"
+    - path: pkg/stanza/internal/time/
+      linters: [revive]
+      text: "var-naming: avoid package names that conflict with Go standard library package names"
+    - path: pkg/stanza/operator/parser/json/
+      linters: [revive]
+      text: "var-naming: avoid package names that conflict with Go standard library package names"
+    - path: pkg/stanza/operator/parser/time/
+      linters: [revive]
+      text: "var-naming: avoid package names that conflict with Go standard library package names"
+    - path: extension/jaegerremotesampling/internal/server/http/
+      linters: [revive]
+      text: "var-naming: avoid package names that conflict with Go standard library package names"
+    - path: extension/sumologicextension/internal/api/
+      linters: [revive]
+      text: "var-naming: avoid meaningless package names"
+    - path: internal/healthcheck/internal/http/
+      linters: [revive]
+      text: "var-naming: avoid package names that conflict with Go standard library package names"
+
+output:
+  formats:
+    - format: colored-line-number
+  show-stats: false
